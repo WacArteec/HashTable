@@ -15,40 +15,29 @@ char *RandString(int len)
     return s;
 }
 
-void Insertion(HashTable *table, Reader *read)
-{
-    for (size_t i = 0; i < read->count_words / 1.5; i++)
-        Insert(table, read->words[i]);
-}
-
 int main()
 {
     Reader *read = Input("WarAndPeace.txt");
- 
-    //for (size_t i = 0; i < read->count_words; i++)
-        //printf("%s", read->words[i]);
-    
+
     printf("\t\n%lu\n", read->count_words);
 
     HashTable *table = CreateTable(64);
 
-    //Insertion(table, read);
-
     printf("\t\n%lu\n", read->count_words);
 
-    for (size_t i = 0; i < read->count_words/2; i++)
+    for (size_t i = 0; i < read->count_words; i++)
     {
-        Insert(table, read->words[i]);
-        //printf("\t\n%d\n", __LINE__);
-        int random = rand() % 32;
+        Insert(table, read->words[i], i);
 
+        int random = rand() % 32;
         char *rand_str = RandString(random);
 
-        //printf("%llu %d %s", i, random, rand_str);
         Search(table, rand_str);
 
         free(rand_str);
     }
+
+    printf("\nsize = %lu capacity = %lu\n", table->size, table->capacity);
 
     DestroyTable(table);
     FreeReader(read);

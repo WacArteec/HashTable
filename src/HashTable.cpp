@@ -1,6 +1,6 @@
 #include "../inc/HashTable.h"
 
-size_t Hash(char *key, size_t capacity)
+size_t Hash(const char *key, size_t capacity)
 {
     const size_t shift = 31;
     size_t hash = 0;
@@ -9,9 +9,9 @@ size_t Hash(char *key, size_t capacity)
     while (*key)
     {
         // printf("\t\n%d\n", __LINE__);
-        hash += (*key - 'a' + 1) * shift_pow;
+        hash = (hash + (*key - 'a' + 1) * shift_pow) % capacity;
+        shift_pow = (shift_pow * shift) % capacity;
 
-        shift_pow *= shift;
         key++;
     }
 
@@ -21,18 +21,22 @@ size_t Hash(char *key, size_t capacity)
 HashTable *CreateTable(size_t init_capacity)
 {
     HashTable *table = (HashTable *)calloc(1, sizeof(HashTable));
+    assert(table);
 
     table->capacity = init_capacity;
     table->size = 0;
 
     table->buckets = (Cell **)calloc(init_capacity, sizeof(Cell *));
+    assert(table->buckets);
 
     return table;
 }
 
 void DestroyTable(HashTable *table)
 {
-    for (size_t i; i < table->capacity; i++)
+    assert(table);
+
+    for (size_t i = 0; i < table->capacity; i++)
     {
         Cell *node = table->buckets[i];
 
@@ -41,6 +45,7 @@ void DestroyTable(HashTable *table)
             Cell *temp = node;
             node = node->next;
 
+            free(temp->key);
             free(temp);
         }
     }
@@ -54,9 +59,12 @@ void DestroyTable(HashTable *table)
 
 void ReHashChains(HashTable *table)
 {
+    assert(table);
+
     size_t new_capacity = table->capacity * SIZE_CHANGE;
 
     Cell **new_table = (Cell **)calloc(new_capacity, sizeof(Cell *));
+    assert(new_table);
 
     for (size_t i = 0; i < table->capacity; i++)
     {
@@ -81,9 +89,11 @@ void ReHashChains(HashTable *table)
     table->capacity = new_capacity;
 }
 
-void Insert(HashTable *table, char *key)
+void Insert(HashTable *table, const char *key, size_t i)
 {
-    if (table->size > (size_t)LOAD_FACTOR * table->capacity)
+    assert(table);
+
+    if (table->size > LOAD_FACTOR * table->capacity)
     {
         printf("\t%d %lu %lu\n", __LINE__, table->size, table->capacity);
         ReHashChains(table);
@@ -95,40 +105,56 @@ void Insert(HashTable *table, char *key)
 
     while (node != NULL)
     {
-        if (node->key == key)
+        if (strcmp(node->key, key) == 0)
+        {
+            node->value++;
             return;
+        }
 
         node = node->next;
     }
 
     Cell *new_node = (Cell *)calloc(1, sizeof(Cell));
+    assert(new_node);
 
-    new_node->key = key;
+    new_node->key = strdup(key);
+    if (!new_node->key)
+    {
+        free(new_node);
+        return;
+    }
+
+    new_node->value = 1;
+
     new_node->next = table->buckets[index];
 
     table->buckets[index] = new_node;
     table->size++;
 }
 
-size_t Search(HashTable *table, char *key)
+size_t Search(HashTable *table, const char *key)
 {
+    assert(table);
+
     size_t index = Hash(key, table->capacity);
 
     Cell *node = table->buckets[index];
 
     while (node != NULL)
     {
-        if (node->key == key)
+        if (strcmp(node->key, key) == 0)
             return node->value;
 
         node = node->next;
     }
 
-    return (size_t)NOTFOUND;
+    return NOTFOUND;
 }
 
-void Delete(HashTable *table, char *key)
+void Delete(HashTable *table, const char *key)
 {
+    assert(table);
+
     size_t index = Hash(key, table->capacity);
 
     Cell *node = table->buckets[index];
@@ -136,13 +162,15 @@ void Delete(HashTable *table, char *key)
 
     while (node != NULL)
     {
-        if (node->key == key)
+        if (strcmp(node->key, key) == 0)
         {
             *node_ptr = node->next;
 
             table->size--;
 
+            free(node->key);
             free(node);
+
             return;
         }
 

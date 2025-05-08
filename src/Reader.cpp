@@ -74,7 +74,7 @@ int WordCounter(struct Reader *read)
             in_word = 0;
     }
 
-    return count_of_words;
+    return count_of_words - 1;
 }
 
 void ReplaceSymbol(struct Reader *read)

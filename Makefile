@@ -1,13 +1,15 @@
 CC = g++
-BEFOREFLAGS = -O3 -c -g
+ASM = nasm
+ASMFLAGS = -f elf64
+BEFOREFLAGS = -O0 -c -g
 MIDFLAGS = -o
 AFTERFLAGS = 
 
 SRC = src/Reader.cpp src/HashTable.cpp src/main.cpp
-OBJ = obj/Reader.o obj/HashTable.o obj/main.o
+ASM_SRC = src/Search.asm
+OBJ = obj/Reader.o obj/HashTable.o obj/main.o obj/Search.o
 
 TARGET = HashTable
-
 
 all: build
 	./$(TARGET)
@@ -20,10 +22,13 @@ $(TARGET): $(OBJ)
 obj/%.o: src/%.cpp
 	$(CC) $(BEFOREFLAGS) $< $(MIDFLAGS) $@
 
+obj/%.o: src/%.asm
+	$(ASM) $(ASMFLAGS) $< -o $@
+
 run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -rf $(TARGET) $(OBJ)
+	rm -rf $(TARGET) $(OBJ) obj/
 
 .PHONY: all clean build run
