@@ -63,7 +63,7 @@ void ReHashChains(HashTable *table)
 
     size_t new_capacity = table->capacity * SIZE_CHANGE;
 
-    Cell **new_table = (Cell **)calloc(new_capacity, sizeof(Cell *));
+    Cell **new_table = (Cell **) calloc(new_capacity, sizeof(Cell *));
     assert(new_table);
 
     for (size_t i = 0; i < table->capacity; i++)
@@ -89,6 +89,22 @@ void ReHashChains(HashTable *table)
     table->capacity = new_capacity;
 }
 
+int NodeIterating(Cell *node, const char *key)
+{
+    while (node != NULL)
+    {
+        if (strcmp(node->key, key) == 0)
+        {
+            node->value++;
+            return FOUND;
+        }
+
+        node = node->next;
+    }
+
+    return NOTFOUND;
+}
+
 void Insert(HashTable *table, const char *key, size_t i)
 {
     assert(table);
@@ -103,16 +119,8 @@ void Insert(HashTable *table, const char *key, size_t i)
 
     Cell *node = table->buckets[index];
 
-    while (node != NULL)
-    {
-        if (strcmp(node->key, key) == 0)
-        {
-            node->value++;
-            return;
-        }
-
-        node = node->next;
-    }
+    if(NodeIterating(node, key) == FOUND)
+        return;
 
     Cell *new_node = (Cell *)calloc(1, sizeof(Cell));
     assert(new_node);

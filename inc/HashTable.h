@@ -1,10 +1,11 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include <assert.h>
+#include <immintrin.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #define FOUND 1
 #define LOAD_FACTOR 16u
