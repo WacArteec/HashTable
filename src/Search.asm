@@ -6,12 +6,13 @@ SearchAsm:
     push r13
     push r14
     
-    mov r12, rdi        ;Сохраняем table
-    mov r13, rsi        ;Сохраняем key
+    mov r12, rdi        ;table
+    mov r13, rsi        ;key
     
     ;Вызываем хэш-фуцнкцию
-    mov rdi, rsi
+    mov rdi, r13
     mov rsi, [r12 + 16] ;table->capacity
+
     call Hash_CRC32
     mov r14, rax        ;Сохраняем хэш в r14
     
@@ -29,11 +30,6 @@ SearchAsm:
 .search_loop:
     test rdi, rdi
     jz .not_found
-
-    ;Сравниваем хэши
-    mov rsi, [rdi + 8]  ;node->key_hash
-    cmp rsi, r14
-    jne .next_node
     
     ;Сравниваем строки
     mov rsi, [rdi]      ;node->key
@@ -56,11 +52,11 @@ SearchAsm:
     jne .next_node
     
     ;Нашли совпадение
-    mov rax, [rdi + 16] ;node->value
+    mov rax, [rdi + 8] ;node->value
     jmp .end
     
 .next_node:
-    mov rdi, [rdi + 24] ;node->next
+    mov rdi, [rdi + 16] ;node->next
     jmp .search_loop
     
 .not_found:
@@ -70,4 +66,4 @@ SearchAsm:
     pop r14
     pop r13
     pop r12
-    ret
+ret

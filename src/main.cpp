@@ -24,17 +24,13 @@ int main()
     HashTable *table = CreateTable(64);
 
     printf("\t\n%lu\n", read->count_words);
-    printf("fdsawer");
 
     for (size_t i = 0; i < read->count_words; i++)
     {
-        printf("fdsawer");
         Insert(table, read->words[i], i);
 
         int random = rand() % 32;
         char *rand_str = RandString(random);
-
-        printf("fdsawer");
 
         SearchAsm(table, rand_str);
 

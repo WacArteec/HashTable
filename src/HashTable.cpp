@@ -114,20 +114,20 @@ int AsmStrcmp(const char *a, const char *b)
         "1:\n"
         "movb (%0), %%al\n"     // Загружаем байт из a
         "cmpb (%1), %%al\n"     // Сравниваем с байтом из b
-        "jne 2f\n"              // Если не равны -> выход
+        "jne 2f\n"              // Если не равны выход
         "inc %0\n"              // Переходим к следующему символу
         "inc %1\n"
         "test %%al, %%al\n"     // Проверяем на конец строки
-        "jnz 1b\n"              // Если не конец -> повторяем
+        "jnz 1b\n"              // Если не конец повторяем
         "2:\n"
-        "sete %%cl\n"           // Устанавливаем результат (1 если равны)
+        "sete %%cl\n"           // Устанавливаем промежуточный результат (1 если равны)
         "movzbl %%cl, %2\n"
         : "+r" (a), "+r" (b), "=r" (result)
         : 
-        : "rax", "rcx", "cc"
+        : "rax", "rcx"
     );
     
-    return (1-result);
+    return (1-result); // для соответствия обычному strcmp
 }
 
 int NodeIterating(Cell *node, const char *key)
@@ -191,7 +191,7 @@ size_t Search(HashTable *table, const char *key)
 
     while (node != NULL)
     {
-        if (strcmp(node->key, key) == 0)
+        if (AsmStrcmp(node->key, key) == 0)
             return node->value;
 
         node = node->next;
@@ -211,7 +211,7 @@ void Delete(HashTable *table, const char *key)
 
     while (node != NULL)
     {
-        if (strcmp(node->key, key) == 0)
+        if (AsmStrcmp(node->key, key) == 0)
         {
             *node_ptr = node->next;
 
