@@ -1,3 +1,4 @@
 *.data
 *.data.old
+*.txt
 HashTable

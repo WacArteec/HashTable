@@ -1,7 +1,22 @@
 #include "../inc/HashTable.h"
 
-size_t Hash(const char *key, size_t capacity)
+extern size_t SearchAsm(const HashTable* table, const char* key);
+
+size_t Hash_CRC32(const char* key, size_t capacity)
 {
+    size_t hash = 0xffffffff;
+
+    while (*key)
+    {
+        key++;
+        hash = _mm_crc32_u8(hash, (unsigned char)(*key));
+    }
+
+    return hash % capacity;
+}
+
+size_t Hash(const char *key, size_t capacity)
+{    
     const size_t shift = 31;
     size_t hash = 0;
     size_t shift_pow = 1;
@@ -16,6 +31,7 @@ size_t Hash(const char *key, size_t capacity)
     }
 
     return hash % capacity;
+    
 }
 
 HashTable *CreateTable(size_t init_capacity)
@@ -74,7 +90,7 @@ void ReHashChains(HashTable *table)
         {
             Cell *next = node->next;
 
-            size_t new_index = Hash(node->key, new_capacity);
+            size_t new_index = Hash_CRC32(node->key, new_capacity);
 
             node->next = new_table[new_index];
             new_table[new_index] = node;
@@ -89,11 +105,36 @@ void ReHashChains(HashTable *table)
     table->capacity = new_capacity;
 }
 
+int AsmStrcmp(const char *a, const char *b)
+{
+    int result;
+
+    __asm
+    (
+        "1:\n"
+        "movb (%0), %%al\n"     // Загружаем байт из a
+        "cmpb (%1), %%al\n"     // Сравниваем с байтом из b
+        "jne 2f\n"              // Если не равны -> выход
+        "inc %0\n"              // Переходим к следующему символу
+        "inc %1\n"
+        "test %%al, %%al\n"     // Проверяем на конец строки
+        "jnz 1b\n"              // Если не конец -> повторяем
+        "2:\n"
+        "sete %%cl\n"           // Устанавливаем результат (1 если равны)
+        "movzbl %%cl, %2\n"
+        : "+r" (a), "+r" (b), "=r" (result)
+        : 
+        : "rax", "rcx", "cc"
+    );
+    
+    return (1-result);
+}
+
 int NodeIterating(Cell *node, const char *key)
 {
     while (node != NULL)
     {
-        if (strcmp(node->key, key) == 0)
+        if (AsmStrcmp(node->key, key) == 0)
         {
             node->value++;
             return FOUND;
@@ -115,7 +156,7 @@ void Insert(HashTable *table, const char *key, size_t i)
         ReHashChains(table);
     }
 
-    size_t index = Hash(key, table->capacity);
+    size_t index = Hash_CRC32(key, table->capacity);
 
     Cell *node = table->buckets[index];
 
@@ -144,7 +185,7 @@ size_t Search(HashTable *table, const char *key)
 {
     assert(table);
 
-    size_t index = Hash(key, table->capacity);
+    size_t index = Hash_CRC32(key, table->capacity);
 
     Cell *node = table->buckets[index];
 
@@ -163,7 +204,7 @@ void Delete(HashTable *table, const char *key)
 {
     assert(table);
 
-    size_t index = Hash(key, table->capacity);
+    size_t index = Hash_CRC32(key, table->capacity);
 
     Cell *node = table->buckets[index];
     Cell **node_ptr = &table->buckets[index];

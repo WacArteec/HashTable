@@ -35,5 +35,8 @@ void ReHashChains(HashTable *table);
 void Insert(HashTable *table, const char *key, size_t i);
 size_t Search(HashTable *table, const char *key);
 void Delete(HashTable *table, const char *key);
+extern "C" size_t Hash_CRC32(const char* key, size_t capacity);
+
+extern "C" size_t SearchAsm(const HashTable* table, const char* key);
 
 #endif //HASHTABLE_H
