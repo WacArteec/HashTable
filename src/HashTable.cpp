@@ -137,7 +137,7 @@ int NodeIterating(Cell *node, const char *key)
 {
     while (node != NULL)
     {
-        if (AsmStrcmp(node->key, key) == 0)
+        if (strcmp(node->key, key) == 0)
         {
             node->value++;
             return FOUND;
@@ -152,12 +152,6 @@ int NodeIterating(Cell *node, const char *key)
 void Insert(HashTable *table, const char *key, size_t i)
 {
     assert(table);
-
-    if (table->size > LOAD_FACTOR * table->capacity)
-    {
-        printf("\n\t need to rehash: size = %lu, capacity = %lu\n", table->size, table->capacity);
-        ReHashChains(table);
-    }
 
     size_t index = Hash_CRC32(key, table->capacity);
 
@@ -194,7 +188,7 @@ size_t Search(HashTable *table, const char *key)
 
     while (node != NULL)
     {
-        if (AsmStrcmp(node->key, key) == 0)
+        if (strcmp(node->key, key) == 0)
             return node->value;
 
         node = node->next;
@@ -214,7 +208,7 @@ void Delete(HashTable *table, const char *key)
 
     while (node != NULL)
     {
-        if (AsmStrcmp(node->key, key) == 0)
+        if (strcmp(node->key, key) == 0)
         {
             *node_ptr = node->next;
 

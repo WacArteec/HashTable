@@ -27,10 +27,16 @@ int main()
     {
         Insert(table, read->words[i], i);
 
-        int random = rand() % 32;
+        if (table->size > LOAD_FACTOR * table->capacity)
+        {
+            printf("\n\t need to rehash: size = %lu, capacity = %lu\n", table->size, table->capacity);
+            ReHashChains(table);
+        }
+
+        int random = rand() % 24;
         char *rand_str = RandString(random);
 
-        SearchAsm(table, rand_str);
+        Search(table, rand_str);
 
         free(rand_str);
     }
