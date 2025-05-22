@@ -23,7 +23,6 @@ size_t Hash(const char *key, size_t capacity)
 
     while (*key)
     {
-        // printf("\t\n%d\n", __LINE__);
         hash = (hash + (*key - 'a' + 1) * shift_pow) % capacity;
         shift_pow = (shift_pow * shift) % capacity;
 
@@ -156,7 +155,7 @@ void Insert(HashTable *table, const char *key, size_t i)
 
     if (table->size > LOAD_FACTOR * table->capacity)
     {
-        printf("\t%d %lu %lu\n", __LINE__, table->size, table->capacity);
+        printf("\n\t need to rehash: size = %lu, capacity = %lu\n", table->size, table->capacity);
         ReHashChains(table);
     }
 

@@ -46,7 +46,7 @@ SearchAsm:
     inc rsi
     inc rdx
     jmp .strcmp_loop
-    
+
 .check_end:
     cmp byte [rdx], 0
     jne .next_node

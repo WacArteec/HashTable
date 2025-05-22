@@ -19,11 +19,9 @@ int main()
 {
     Reader *read = Input("WarAndPeace.txt");
 
-    printf("\t\n%lu\n", read->count_words);
+    printf("\t\ncount of words: %lu\n", read->count_words);
 
     HashTable *table = CreateTable(64);
-
-    printf("\t\n%lu\n", read->count_words);
 
     for (size_t i = 0; i < read->count_words; i++)
     {
@@ -37,11 +35,11 @@ int main()
         free(rand_str);
     }
 
-    printf("\nsize = %lu capacity = %lu\n", table->size, table->capacity);
+    printf("\n unique words (size) = %lu capacity = %lu\n", table->size, table->capacity);
 
     DestroyTable(table);
     FreeReader(read);
 
-    printf("\tjhgfds\n");
+    printf("\tend\n");
     return 0;
 }
