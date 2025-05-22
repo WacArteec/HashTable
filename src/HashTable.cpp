@@ -121,7 +121,7 @@ int AsmStrcmp(const char *a, const char *b)
         "inc %1\n"
         "test %%al, %%al\n"     // Проверяем на конец строки
         "jnz loop_cmp\n"              // Если не конец повторяем
-
+        
         "end:\n"
         "sete %%cl\n"           // Устанавливаем промежуточный результат (1 если равны)
         "movzbl %%cl, %2\n"
